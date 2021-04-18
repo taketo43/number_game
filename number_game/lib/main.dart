@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './player.dart';
+import './gamepage.dart';
 
 void main() {
   runApp(MyApp());
@@ -101,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
-            PlayerFieldWidget()
+            GamePage(1, 5, 5, ['User1', 'User2', 'User3', 'User4', 'User5'])
           ],
         ),
       ),
