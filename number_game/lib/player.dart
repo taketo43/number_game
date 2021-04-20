@@ -85,7 +85,7 @@ class _PlayerFieldWidgetState extends State<PlayerFieldWidget> {
     return SizedBox(
       child: Stack(
         children: <Widget>[
-          if(widget.selections.length != 0) for(int i = 0; i < widget.selections.length; i++)
+          for(int i = 0; i < widget.selections.length; i++)
             Positioned(
               child: MyCardWidget(widget.selections[i], null),
               left: r - cos(pi * i / (widget.players.length - 1)) * r * 0.5 + cardWidth / 2,
