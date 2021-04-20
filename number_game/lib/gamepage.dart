@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import './player.dart';
 import './my_card.dart';
+import './main.dart';
 
 
 class GamePage extends StatefulWidget {
@@ -27,7 +28,9 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage> {
   int selectedNumber;
   bool isDetermined = false;
-  List selections = [];
+  List<int> selections = [];
+  int turn_num = 1;
+  String room_id = "test"; // 後で書き換える
 
   void _handleSelectedNumberChanged(int newValue) {
     setState(() {
@@ -36,16 +39,22 @@ class _GamePageState extends State<GamePage> {
     });
   }
 
-  void _handleDeterminedNumber() async {
+  void _handleDeterminedNumber() {
     setState(() {
       isDetermined = true;
-      // ここは動作確認をしているだけなので後で書き換える
-      // widget.myNumbers.remove(selectedNumber);
-      // selectedNumber = null;
-      selections = [1, 1, 2, 3];
+    });
+    socket.emit('choose', [room_id, widget.playerID, turn_num, selectedNumber]);
+  }
+
+  void _everyoneSelected(List<int> selections) async {
+    selections.removeAt(widget.playerID);
+    setState(() {
+      this.selections = selections;
     });
 
-    // この処理は全員の選択終了後に行う
+
+    await Future.delayed(Duration(seconds: 2));
+    
     await showDialog(
       context: context,
       builder: (context){
@@ -62,11 +71,16 @@ class _GamePageState extends State<GamePage> {
         );
       }
     );
+
     setState(() {
       isDetermined = false;
+      for(int i = 0; i < widget.players.length; i++){
+        widget.players[i].use(selections[i]);
+      }
       widget.myNumbers.remove(selectedNumber);
-      selections = null;
+      selections = [];
       selectedNumber = null;
+      turn_num++;
     });
   }
 
@@ -85,6 +99,7 @@ class _GamePageState extends State<GamePage> {
       for(int i = 0; i < widget.players.length; i++){
         widget.players[i].init(widget.turns);
       }
+      turn_num = 1;
     });
   }
 
@@ -97,47 +112,55 @@ class _GamePageState extends State<GamePage> {
     double width = MediaQuery.of(context).size.width / widget.turns;
     double height = width * (1 + sqrt(5)) / 2;
     return Expanded(
-      child: Column(
-        children: [
-          PlayerFieldWidget(widget.players, selectedNumber, selections),
-          SizedBox(
-            child: Stack(
-              children: [
-                for(int i = 0; i < widget.myNumbers.length; i++)
-                  AnimatedPositioned(
-                    child: MyCardWidget(widget.myNumbers[i], _handleSelectedNumberChanged),
-                    top: widget.myNumbers[i] != selectedNumber ? height : isDetermined ? 0 : height / 2,
-                    left: i * width + (widget.turns - widget.myNumbers.length) / widget.myNumbers.length * width * (i + 0.5),
-                    width: width,
-                    height: height,
-                    duration: Duration(milliseconds: 200),
-                  ),
-              ],
-            ),
-            height: height * 2,
-          ),
-          if(selectedNumber != null) ElevatedButton(
-            onPressed: isDetermined ? null : _handleDeterminedNumber,
-            child: Text("数字を確定する"),
-            style: ElevatedButton.styleFrom(
-              shape: StadiumBorder(),
-            ),
-          ),
-          if(widget.myNumbers.length == 0) ElevatedButton(
-            onPressed: _handleGameResart,
-            child: Text("もう一度"),
-            style: ElevatedButton.styleFrom(
-              shape: StadiumBorder(),
-            ),
-          ),
-          if(widget.myNumbers.length == 0) ElevatedButton(
-            onPressed: _handleFinishGame,
-            child: Text("ホームへ戻る"),
-            style: ElevatedButton.styleFrom(
-              shape: StadiumBorder(),
-            ),
-          ),
-        ]
+      child: StreamBuilder(
+        stream: streamSocket.getResponse,
+        builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot){
+          if(snapshot.data['event'] == 'everyone selected'){
+            _everyoneSelected(snapshot.data['numbers']);
+          }
+          return Column(
+            children: [
+              PlayerFieldWidget(widget.players, selectedNumber, selections),
+              SizedBox(
+                child: Stack(
+                  children: [
+                    for(int i = 0; i < widget.myNumbers.length; i++)
+                      AnimatedPositioned(
+                        child: MyCardWidget(widget.myNumbers[i], _handleSelectedNumberChanged),
+                        top: widget.myNumbers[i] != selectedNumber ? height : isDetermined ? 0 : height / 2,
+                        left: i * width + (widget.turns - widget.myNumbers.length) / widget.myNumbers.length * width * (i + 0.5),
+                        width: width,
+                        height: height,
+                        duration: Duration(milliseconds: 200),
+                      ),
+                  ],
+                ),
+                height: height * 2,
+              ),
+              if(selectedNumber != null) ElevatedButton(
+                onPressed: isDetermined ? null : _handleDeterminedNumber,
+                child: Text("数字を確定する"),
+                style: ElevatedButton.styleFrom(
+                  shape: StadiumBorder(),
+                ),
+              ),
+              if(widget.myNumbers.length == 0) ElevatedButton(
+                onPressed: _handleGameResart,
+                child: Text("もう一度"),
+                style: ElevatedButton.styleFrom(
+                  shape: StadiumBorder(),
+                ),
+              ),
+              if(widget.myNumbers.length == 0) ElevatedButton(
+                onPressed: _handleFinishGame,
+                child: Text("ホームへ戻る"),
+                style: ElevatedButton.styleFrom(
+                  shape: StadiumBorder(),
+                ),
+              ),
+            ]
+          );
+        }
       )
     );
   }
