@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import './player.dart';
 import './my_card.dart';
-import './main.dart';
+import './socket_io_setup.dart';
 
 
 class GamePage extends StatefulWidget {
@@ -115,7 +115,7 @@ class _GamePageState extends State<GamePage> {
       child: StreamBuilder(
         stream: streamSocket.getResponse,
         builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot){
-          if(snapshot.data['event'] == 'everyone selected'){
+          if(snapshot.hasData && snapshot.data['event'] == 'everyone selected'){
             _everyoneSelected(snapshot.data['numbers']);
           }
           return Column(
