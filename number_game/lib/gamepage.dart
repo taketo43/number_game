@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import './player.dart';
@@ -28,9 +29,9 @@ class GamePage extends StatefulWidget {
 class _GamePageState extends State<GamePage> {
   int selectedNumber;
   bool isDetermined = false;
-  List<int> selections = [];
-  int turn_num = 1;
-  String room_id = "test"; // 後で書き換える
+  List<dynamic> selections = [];
+  int turnNum = 1;
+  String roomID = "test"; // 後で書き換える
 
   void _handleSelectedNumberChanged(int newValue) {
     setState(() {
@@ -43,22 +44,14 @@ class _GamePageState extends State<GamePage> {
     setState(() {
       isDetermined = true;
     });
-    socket.emit('choose', [room_id, widget.playerID, turn_num, selectedNumber]);
+    socket.emit('choose', [roomID, widget.playerID, turnNum, selectedNumber]);
   }
 
-  void _everyoneSelected(List<int> selections) async {
-    selections.removeAt(widget.playerID);
-    setState(() {
-      this.selections = selections;
-    });
-
-
-    await Future.delayed(Duration(seconds: 2));
-    
+  void _everyoneSelected() async{
     await showDialog(
       context: context,
       builder: (context){
-        return selections.indexOf(selectedNumber) == -1 ? SimpleDialog(
+        Widget res = selections.indexOf(selectedNumber) == -1 ? SimpleDialog(
           title: Text("セーフ"),
           children: [
             Text("今回はセーフ") // 差し替えてもいいかも
@@ -69,27 +62,24 @@ class _GamePageState extends State<GamePage> {
             Text("$selectedNumber 被り") // 差し替えてもいいかも
           ]
         );
+        return res;
       }
     );
 
+    print(selections);
+
     setState(() {
       isDetermined = false;
-      for(int i = 0; i < widget.players.length; i++){
+      for(int i = 0; i < selections.length; i++){
         widget.players[i].use(selections[i]);
       }
       widget.myNumbers.remove(selectedNumber);
-      selections = [];
       selectedNumber = null;
-      turn_num++;
+      turnNum++;
+      selections = [];
     });
+    streamSocket.addResponse(null); // なぜかここでnullを入れないと同じデータが２回読み込まれてしまう
   }
-
-  // 全員の選択が完了したら
-  // myNumbers.remove(selectedNumber);
-  // selectdNumber = null;
-  // isDetermined = false;
-  // playersのuseメソッドの実行
-  // 
   
   void _handleGameResart() {
     setState(() {
@@ -99,11 +89,12 @@ class _GamePageState extends State<GamePage> {
       for(int i = 0; i < widget.players.length; i++){
         widget.players[i].init(widget.turns);
       }
-      turn_num = 1;
+      turnNum = 1;
     });
   }
 
   void _handleFinishGame() {
+    socket.emit('finish', roomID);
     // ホーム画面へ戻る処理
   }
 
@@ -116,8 +107,16 @@ class _GamePageState extends State<GamePage> {
         stream: streamSocket.getResponse,
         builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot){
           if(snapshot.hasData && snapshot.data['event'] == 'everyone selected'){
-            _everyoneSelected(snapshot.data['numbers']);
+            selections = snapshot.data['numbers'];
+            selections.removeAt(widget.playerID);
+            Timer(Duration(seconds: 2), _everyoneSelected);
           }
+
+          for(int i = 0; i < selections.length; i++){
+            selections[i] = int.parse(selections[i]);
+            widget.players[i].use(selections[i]);
+          }
+
           return Column(
             children: [
               PlayerFieldWidget(widget.players, selectedNumber, selections),

@@ -51,13 +51,13 @@ void connectAndListen(){
     });
 
     socket.on('everyone selected', (data){
+      print('everyone selected');
       data['event'] = 'everyone selected';
       streamSocket.addResponse(data);
     });
 
     socket.on('finish', (data){
-      data['event'] = 'finish';
-      streamSocket.addResponse(data);
+      print('finish');
     });
 
     socket.on('err', (data){
