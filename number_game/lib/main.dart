@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import './gamepage.dart';
+import './socket_io_setup.dart';
 
 void main() {
+  connectAndListen();
   runApp(MyApp());
 }
 
@@ -101,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
-            GamePage(1, 5, 5, ['User1', 'User2', 'User3', 'User4', 'User5'])
+            GamePage(0, 2, 4, ['User1', 'User2'])
           ],
         ),
       ),

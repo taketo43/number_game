@@ -82,14 +82,15 @@ class _PlayerFieldWidgetState extends State<PlayerFieldWidget> {
   Widget build(BuildContext context) {
     final double r = (MediaQuery.of(context).size.width - iconSize) / 2;
     final double cardWidth = iconSize / 2;
+    final double theta = pi / (widget.players.length + 1);
     return SizedBox(
       child: Stack(
         children: <Widget>[
-          if(widget.selections != null) for(int i = 0; i < widget.selections.length; i++)
+          for(int i = 0; i < widget.selections.length; i++)
             Positioned(
               child: MyCardWidget(widget.selections[i], null),
-              left: r - cos(pi * i / (widget.players.length - 1)) * r * 0.5 + cardWidth / 2,
-              top: r - sin(pi * i / (widget.players.length - 1)) * r * 0.5,
+              left: r - cos(theta * (i + 1)) * r * 0.5 + cardWidth / 2,
+              top: r - sin(theta * (i + 1)) * r * 0.5,
               width: cardWidth,
               height: cardWidth * (1 + sqrt(5)) / 2,
             ),
@@ -99,12 +100,12 @@ class _PlayerFieldWidgetState extends State<PlayerFieldWidget> {
                 player: widget.players[i],
                 color: widget.players[i].isHaving(widget.selectedNumber) ? Colors.red : null,
               ),
-              left: r - cos(pi * i / (widget.players.length - 1)) * r,
-              top: r - sin(pi * i / (widget.players.length - 1)) * r,
+              left: r - cos(theta * (i + 1)) * r,
+              top: r - sin(theta * (i + 1)) * r,
             ),
         ],
       ),
-      height: r * 1.5,
+      height: r * 1.5 + iconSize / 2,
     );
   }
 }
