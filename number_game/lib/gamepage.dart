@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import './player.dart';
-import './my_card.dart';
 import './socket_io_setup.dart';
 
 
 class GamePage extends StatefulWidget {
   final List<Player> players = [];
-  final List<int> myNumbers = [];
+  final List myNumbers = [];
   final int playerNumbers; // プレイヤーの人数
   final int playerID; // プレイヤーの中の自分のID
   final int turns;
@@ -35,8 +34,7 @@ class _GamePageState extends State<GamePage> {
 
   void _handleSelectedNumberChanged(int newValue) {
     setState(() {
-      if(selectedNumber == newValue) selectedNumber = null;
-      else selectedNumber = newValue;
+      selectedNumber = newValue;
     });
   }
 
@@ -100,7 +98,7 @@ class _GamePageState extends State<GamePage> {
 
   @override
   Widget build(BuildContext context){
-    double width = MediaQuery.of(context).size.width / widget.turns;
+    double width = MediaQuery.of(context).size.width / 3;
     double height = width * (1 + sqrt(5)) / 2;
     return Scaffold(
       appBar: AppBar(),
@@ -116,24 +114,37 @@ class _GamePageState extends State<GamePage> {
             selections[i] = int.parse(selections[i]);
             widget.players[i].use(selections[i]);
           }
+          List<DropdownMenuItem<int>> _numbers = [];
+          for(int value in widget.myNumbers){
+            _numbers.add(DropdownMenuItem(
+              child: Text('$value'),
+              value: value,
+            ));
+          }
           return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(height: 30), // margin
               PlayerFieldWidget(widget.players, selectedNumber, selections),
               SizedBox(
-                child: Stack(
-                  children: [
-                    for(int i = 0; i < widget.myNumbers.length; i++)
-                      AnimatedPositioned(
-                        child: MyCardWidget(widget.myNumbers[i], _handleSelectedNumberChanged),
-                        top: widget.myNumbers[i] != selectedNumber ? height : isDetermined ? 0 : height / 2,
-                        left: i * width + (widget.turns - widget.myNumbers.length) / widget.myNumbers.length * width * (i + 0.5),
-                        width: width,
-                        height: height,
-                        duration: Duration(milliseconds: 200),
-                      ),
-                  ],
+                child: Card(
+                  child: Center(
+                    child: Text(
+                      selectedNumber == null ? '' : '$selectedNumber',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      )
+                    ),
+                  )
                 ),
-                height: height * 2,
+                width: width,
+                height: height,
+              ),
+              DropdownButton(
+                items: _numbers,
+                value: selectedNumber,
+                onChanged: isDetermined ? null : _handleSelectedNumberChanged,
               ),
               if(selectedNumber != null) ElevatedButton(
                 onPressed: isDetermined ? null : _handleDeterminedNumber,
