@@ -126,6 +126,7 @@ class _GamePageState extends State<GamePage> {
             children: [
               SizedBox(height: 30), // margin
               PlayerFieldWidget(widget.players, selectedNumber, selections),
+              SizedBox(height: 30), // margin
               SizedBox(
                 child: Card(
                   child: Center(
