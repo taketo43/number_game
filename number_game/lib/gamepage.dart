@@ -102,8 +102,9 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context){
     double width = MediaQuery.of(context).size.width / widget.turns;
     double height = width * (1 + sqrt(5)) / 2;
-    return Expanded(
-      child: StreamBuilder(
+    return Scaffold(
+      appBar: AppBar(),
+      body: StreamBuilder(
         stream: streamSocket.getResponse,
         builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot){
           if(snapshot.hasData && snapshot.data['event'] == 'everyone selected'){
@@ -111,12 +112,10 @@ class _GamePageState extends State<GamePage> {
             selections.removeAt(widget.playerID);
             Timer(Duration(seconds: 2), _everyoneSelected);
           }
-
           for(int i = 0; i < selections.length; i++){
             selections[i] = int.parse(selections[i]);
             widget.players[i].use(selections[i]);
           }
-
           return Column(
             children: [
               PlayerFieldWidget(widget.players, selectedNumber, selections),

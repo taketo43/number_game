@@ -22,7 +22,13 @@ class _MyCardWidgetState extends State<MyCardWidget> {
       onTap: _handleTap,
       child: Card(
         child: Center(
-          child: Text('$value'),
+          child: Text(
+            '$value',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            )
+          ),
         )
       ),
     );
