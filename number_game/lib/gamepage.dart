@@ -64,8 +64,6 @@ class _GamePageState extends State<GamePage> {
       }
     );
 
-    print(selections);
-
     setState(() {
       isDetermined = false;
       for(int i = 0; i < selections.length; i++){
@@ -80,20 +78,25 @@ class _GamePageState extends State<GamePage> {
   }
   
   void _handleGameResart() {
-    setState(() {
-      for(int i = 1; i <= widget.turns; i++){
-        widget.myNumbers.add(i);
-      }
-      for(int i = 0; i < widget.players.length; i++){
-        widget.players[i].init(widget.turns);
-      }
-      turnNum = 1;
-    });
+    if(widget.myNumbers.length == 0){
+      setState(() {
+        for(int i = 1; i <= widget.turns; i++){
+          widget.myNumbers.add(i);
+        }
+        for(int i = 0; i < widget.players.length; i++){
+          widget.players[i].init(widget.turns);
+        }
+        turnNum = 1;
+      });
+    }
+    streamSocket.addResponse(null);
   }
 
   void _handleFinishGame() {
     socket.emit('finish', roomID);
+    streamSocket.addResponse(null);
     // ホーム画面へ戻る処理
+    
   }
 
   @override
@@ -109,6 +112,12 @@ class _GamePageState extends State<GamePage> {
             selections = snapshot.data['numbers'];
             selections.removeAt(widget.playerID);
             Timer(Duration(seconds: 2), _everyoneSelected);
+          }else if(snapshot.hasData && snapshot.data['event'] == 'start'){
+            print('start');
+            Timer(Duration(microseconds: 100), _handleGameResart);
+          }else if(snapshot.hasData && snapshot.data['event'] == 'finish'){
+            print('finish');
+            Timer(Duration(microseconds: 100), _handleFinishGame);
           }
           for(int i = 0; i < selections.length; i++){
             selections[i] = int.parse(selections[i]);
