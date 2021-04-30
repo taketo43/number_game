@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:number_game/socket_io_setup.dart';
 import 'package:number_game/waiting_room.dart';
 
 
 class CreatedGameListState extends State<CreatedGameList> {
+  List gameList = [];
+@override
+void initState() {
+  super.initState();
+  socket.emit('get rooms');
+}
 
   @override
   Widget build(BuildContext context) {
@@ -10,17 +17,32 @@ class CreatedGameListState extends State<CreatedGameList> {
       appBar: AppBar(
         title: Text("募集中のゲーム"),
       ),
-      body: ListView(
-        children: [
-          _gameItem("hayato", 3, context),
-          _gameItem("takeda", 0, context),
-          _gameItem("fujitani", 3, context),
-          _gameItem("tanuma", 2, context),
-        ],
-      ),
+      body: StreamBuilder(
+        stream: streamSocket.getResponse,
+        builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot){
+          if(snapshot.hasData && snapshot.data["event"] == "room list"){
+            gameList = snapshot.data["rooms"];
+            streamSocket.addResponse(null);
+          }
+          print(gameList);
+          return ListView(
+            children: [
+              for(var room in gameList)
+                _gameItem(room["host"], room["people"], room["room_id"], context),
+              ElevatedButton(
+                onPressed: (){
+                  socket.emit('get rooms');
+                },
+                child: Text('reload')
+              )
+            ],
+          );
+        }
+      )
     );
   }
-  Widget _gameItem(String host, int participants, context) {
+
+  Widget _gameItem(String host, int participants, String roomID, context) {
     String username = widget.username;
     return GestureDetector(
       child: Container(
@@ -44,6 +66,7 @@ class CreatedGameListState extends State<CreatedGameList> {
         ),
       ),
       onTap: (){
+        socket.emit('join', [roomID, 'test_user']);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => WaitingRoom(username))
