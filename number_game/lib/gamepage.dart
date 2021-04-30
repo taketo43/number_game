@@ -64,8 +64,6 @@ class _GamePageState extends State<GamePage> {
       }
     );
 
-    print(selections);
-
     setState(() {
       isDetermined = false;
       for(int i = 0; i < selections.length; i++){
@@ -80,25 +78,35 @@ class _GamePageState extends State<GamePage> {
   }
   
   void _handleGameResart() {
-    setState(() {
-      for(int i = 1; i <= widget.turns; i++){
-        widget.myNumbers.add(i);
-      }
-      for(int i = 0; i < widget.players.length; i++){
-        widget.players[i].init(widget.turns);
-      }
-      turnNum = 1;
-    });
+    if(widget.myNumbers.length == 0){
+      setState(() {
+        for(int i = 1; i <= widget.turns; i++){
+          widget.myNumbers.add(i);
+        }
+        for(int i = 0; i < widget.players.length; i++){
+          widget.players[i].init(widget.turns);
+        }
+        turnNum = 1;
+      });
+    }
+    streamSocket.addResponse(null);
   }
 
   void _handleFinishGame() {
     socket.emit('finish', roomID);
+    streamSocket.addResponse(null);
+    _toHomePage();
+  }
+
+  void _toHomePage() {
     // ホーム画面へ戻る処理
+    socket.emit('exit room', roomID);
+    print('exit');
   }
 
   @override
   Widget build(BuildContext context){
-    double width = MediaQuery.of(context).size.width / 3;
+    double width = MediaQuery.of(context).size.width / 3.5;
     double height = width * (1 + sqrt(5)) / 2;
     return Scaffold(
       appBar: AppBar(),
@@ -109,6 +117,12 @@ class _GamePageState extends State<GamePage> {
             selections = snapshot.data['numbers'];
             selections.removeAt(widget.playerID);
             Timer(Duration(seconds: 2), _everyoneSelected);
+          }else if(snapshot.hasData && snapshot.data['event'] == 'start'){
+            print('start');
+            Timer(Duration(microseconds: 100), _handleGameResart);
+          }else if(snapshot.hasData && snapshot.data['event'] == 'finish'){
+            print('finish');
+            Timer(Duration(microseconds: 100), _toHomePage);
           }
           for(int i = 0; i < selections.length; i++){
             selections[i] = int.parse(selections[i]);
@@ -121,54 +135,70 @@ class _GamePageState extends State<GamePage> {
               value: value,
             ));
           }
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 30), // margin
-              PlayerFieldWidget(widget.players, selectedNumber, selections),
-              SizedBox(height: 30), // margin
-              SizedBox(
-                child: Card(
-                  child: Center(
-                    child: Text(
-                      selectedNumber == null ? '' : '$selectedNumber',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      )
+          return Container(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 20), // margin
+                PlayerFieldWidget(widget.players, selectedNumber, selections),
+                SizedBox(height: 10), // margin
+                SizedBox(
+                  child: Card(
+                    child: Center(
+                      child: Text(
+                        selectedNumber == null ? '' : '$selectedNumber',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        )
+                      ),
+                    )
+                  ),
+                  width: width,
+                  height: height,
+                ),
+                SizedBox(height: 10), // margin
+                Container(
+                  child: Padding(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                        items: _numbers,
+                        value: selectedNumber,
+                        onChanged: isDetermined ? null : _handleSelectedNumberChanged,
+                      ),
                     ),
-                  )
+                    padding: EdgeInsets.only(left: 10, right: 10),
+                  ),
+                  color: Colors.white,
                 ),
-                width: width,
-                height: height,
-              ),
-              DropdownButton(
-                items: _numbers,
-                value: selectedNumber,
-                onChanged: isDetermined ? null : _handleSelectedNumberChanged,
-              ),
-              if(selectedNumber != null) ElevatedButton(
-                onPressed: isDetermined ? null : _handleDeterminedNumber,
-                child: Text("数字を確定する"),
-                style: ElevatedButton.styleFrom(
-                  shape: StadiumBorder(),
+                SizedBox(height: 10), // margin
+                if(selectedNumber != null) ElevatedButton(
+                  onPressed: isDetermined ? null : _handleDeterminedNumber,
+                  child: Text("確定する"),
+                  style: ElevatedButton.styleFrom(
+                    shape: StadiumBorder(),
+                  ),
                 ),
-              ),
-              if(widget.myNumbers.length == 0) ElevatedButton(
-                onPressed: _handleGameResart,
-                child: Text("もう一度"),
-                style: ElevatedButton.styleFrom(
-                  shape: StadiumBorder(),
+                SizedBox(height: 5), // margin
+                if(widget.myNumbers.length == 0) ElevatedButton(
+                  onPressed: _handleGameResart,
+                  child: Text("もう一度"),
+                  style: ElevatedButton.styleFrom(
+                    shape: StadiumBorder(),
+                  ),
                 ),
-              ),
-              if(widget.myNumbers.length == 0) ElevatedButton(
-                onPressed: _handleFinishGame,
-                child: Text("ホームへ戻る"),
-                style: ElevatedButton.styleFrom(
-                  shape: StadiumBorder(),
+                SizedBox(height: 5), // margin
+                if(widget.myNumbers.length == 0) ElevatedButton(
+                  onPressed: _handleFinishGame,
+                  child: Text("ホームへ"),
+                  style: ElevatedButton.styleFrom(
+                    shape: StadiumBorder(),
+                  ),
                 ),
-              ),
-            ]
+                Expanded(child: Container())
+              ]
+            ),
+            color: Colors.blueGrey[50],
           );
         }
       )
