@@ -24,7 +24,6 @@ void initState() {
             gameList = snapshot.data["rooms"];
             streamSocket.addResponse(null);
           }
-          print(gameList);
           return ListView(
             children: [
               for(var room in gameList)
@@ -44,34 +43,23 @@ void initState() {
 
   Widget _gameItem(String host, int participants, String roomID, context) {
     String username = widget.username;
-    return GestureDetector(
-      child: Container(
-        padding: EdgeInsets.all(20.0),
-        decoration: new BoxDecoration(
-          border: new Border(bottom: BorderSide(width: 1.0, color: Colors.grey))
-        ),
-        child: Row(
-          children: [
-            Container(
-              margin: EdgeInsets.all(10.0),
-            ),
-            Text(
-              host + " : " + participants.toString() + "人",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 20.0,
-              ),
-            )
-          ],
-        ),
+    return ListTile(
+      title: Text("$roomID"),
+      subtitle: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("ホスト : $host"),
+          Text("現在の人数 : $participants"),
+        ]
       ),
       onTap: (){
-        socket.emit('join', [roomID, 'test_user']);
+        socket.emit('join', [roomID, username]);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => WaitingRoom(username))
         );
       },
+      leading: Icon(Icons.group, size: 48),
     );
   }
 }
