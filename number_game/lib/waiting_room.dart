@@ -17,7 +17,7 @@ class WaitingRoom extends StatefulWidget {
 class WaitingRoomState extends State<WaitingRoom> {
   List userList = [];
   int userID;
-  int turns;
+  int turns = 4;
   bool startFlag = false;
 
   @override
@@ -48,7 +48,9 @@ class WaitingRoomState extends State<WaitingRoom> {
             }
             if(snapshot.hasData && snapshot.data["event"] == "start"){
               userList = snapshot.data["members"];
+              print(snapshot.data);
               Timer(Duration(milliseconds: 100), () {
+                print(userList);
                 Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => GamePage(userID, userList.length, snapshot.data["turns"], userList)
                 ));
