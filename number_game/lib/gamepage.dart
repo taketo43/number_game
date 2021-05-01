@@ -120,6 +120,7 @@ class _GamePageState extends State<GamePage> {
             Timer(Duration(microseconds: 100), () {
               socket.emit('exit room', roomID);
               print('exit');
+              Navigator.of(context).popUntil((route) => route.isFirst);
             });
           }
           for(int i = 0; i < selections.length; i++){
