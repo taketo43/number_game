@@ -69,8 +69,24 @@ class WaitingRoomState extends State<WaitingRoom> {
                   height: 40,
                   child: ElevatedButton(
                     child: Text("ゲームを始める"),
-                    onPressed: widget.userID == 0 ? () {
-                      socket.emit('start', [widget.roomID, turns]);
+                    onPressed: widget.userID == 0 ? () async {
+                      await showDialog(
+                        context: context,
+                        builder: (context){
+                          return SimpleDialog(
+                            title: Text("ターン数を選択してください"),
+                            children: [
+                              for(int i = 1; i <= 8; i++) 
+                                SimpleDialogOption(
+                                  child: Text("$i"),
+                                  onPressed: (){
+                                    socket.emit('start', [widget.roomID, i]);
+                                  }
+                                )
+                            ],
+                          );
+                        }
+                      );
                     } : null,
                   )
                 ),
