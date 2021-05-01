@@ -27,7 +27,6 @@ void connectAndListen(){
 
     socket.onConnect((_) {
      print('connect');
-     socket.emit('create', ['test', 'test_user']);
     });
 
     //When an event recieved from server, data is added to the stream

@@ -133,7 +133,6 @@ class _GamePageState extends State<GamePage> {
             });
           }
           for(int i = 0; i < selections.length; i++){
-            selections[i] = int.parse(selections[i]);
             widget.players[i].use(selections[i]);
           }
           List<DropdownMenuItem<int>> _numbers = [];
