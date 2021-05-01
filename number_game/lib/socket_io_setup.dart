@@ -1,10 +1,11 @@
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 
 
 // STEP1:  Stream setup
 class StreamSocket{
-  final _socketResponse= StreamController<Map<String, dynamic>>();
+  final _socketResponse= BehaviorSubject<Map<String, dynamic>>();
 
   void Function(Map<String, dynamic>) get addResponse => _socketResponse.sink.add;
 
@@ -47,6 +48,11 @@ void connectAndListen(){
 
     socket.on('start', (data){
       data['event'] = 'start';
+      streamSocket.addResponse(data);
+    });
+
+    socket.on('leave', (data){
+      data['event'] = 'leave';
       streamSocket.addResponse(data);
     });
 
