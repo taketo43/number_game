@@ -17,7 +17,6 @@ class WaitingRoom extends StatefulWidget {
 class WaitingRoomState extends State<WaitingRoom> {
   List userList = [];
   int userID;
-  int turns = 4;
   bool startFlag = false;
 
   @override
