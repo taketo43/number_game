@@ -17,7 +17,6 @@ class WaitingRoom extends StatefulWidget {
 class WaitingRoomState extends State<WaitingRoom> {
   List userList = [];
   int userID;
-  int turns = 4;
   bool startFlag = false;
 
   @override
@@ -52,7 +51,7 @@ class WaitingRoomState extends State<WaitingRoom> {
               Timer(Duration(milliseconds: 100), () {
                 print(userList);
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => GamePage(userID, userList.length, snapshot.data["turns"], userList)
+                  builder: (context) => GamePage(userID, widget.roomID, userList.length, snapshot.data["turns"], userList)
                 ));
               });
             }
@@ -61,16 +60,38 @@ class WaitingRoomState extends State<WaitingRoom> {
               children: [
                 Column(children: [
                   for (int i = 0; i < userList.length; i++)
-                    Text(userList[i] + (userID == i ? " (You)" : ""))
+                    ListTile(
+                      title: Text(userList[i] + (userID == i ? " (You)" : "")),
+                      leading: Icon(Icons.person, size: 48),
+                      subtitle: i == 0 ? Text("ホスト") : Text("メンバー"),
+                    )
                 ]),
+                CircularProgressIndicator(),
+                Expanded(child: Container(),),
                 ButtonTheme(
                   buttonColor: Colors.white54,
                   minWidth: 150,
                   height: 40,
                   child: ElevatedButton(
                     child: Text("ゲームを始める"),
-                    onPressed: widget.userID == 0 ? () {
-                      socket.emit('start', [widget.roomID, turns]);
+                    onPressed: widget.userID == 0 ? () async {
+                      await showDialog(
+                        context: context,
+                        builder: (context){
+                          return SimpleDialog(
+                            title: Text("ターン数を選択してください"),
+                            children: [
+                              for(int i = 1; i <= 8; i++) 
+                                SimpleDialogOption(
+                                  child: Text("$i"),
+                                  onPressed: (){
+                                    socket.emit('start', [widget.roomID, i]);
+                                  }
+                                )
+                            ],
+                          );
+                        }
+                      );
                     } : null,
                   )
                 ),
@@ -86,6 +107,7 @@ class WaitingRoomState extends State<WaitingRoom> {
                     },
                   )
                 ),
+                SizedBox(height: 100),
               ],
             );
           }

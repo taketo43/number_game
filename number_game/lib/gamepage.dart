@@ -10,8 +10,9 @@ class GamePage extends StatefulWidget {
   final List myNumbers = [];
   final int playerNumbers; // プレイヤーの人数
   final int playerID; // プレイヤーの中の自分のID
+  final String roomID;
   final int turns;
-  GamePage(this.playerID, this.playerNumbers, this.turns, playerData){
+  GamePage(this.playerID, this.roomID, this.playerNumbers, this.turns, playerData){
     for(int i = 1; i <= turns; i++){
       myNumbers.add(i);
     }
@@ -30,7 +31,13 @@ class _GamePageState extends State<GamePage> {
   bool isDetermined = false;
   List<dynamic> selections = [];
   int turnNum = 1;
-  String roomID = "test"; // 後で書き換える
+  String roomID; // 後で書き換える
+
+  @override
+  void initState() {
+    roomID = widget.roomID;
+    super.initState();
+  }
 
   void _handleSelectedNumberChanged(int newValue) {
     setState(() {
@@ -101,9 +108,11 @@ class _GamePageState extends State<GamePage> {
   Widget build(BuildContext context){
     double width = MediaQuery.of(context).size.width / 3.5;
     double height = width * (1 + sqrt(5)) / 2;
+    int turns = widget.turns;
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false
+        automaticallyImplyLeading: false,
+        title: Text("ターン " + (turnNum <= turns ? "$turnNum / $turns" : "0 / $turns")),
       ),
       body: StreamBuilder(
         stream: streamSocket.getResponse,
