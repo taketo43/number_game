@@ -52,7 +52,7 @@ class WaitingRoomState extends State<WaitingRoom> {
               Timer(Duration(milliseconds: 100), () {
                 print(userList);
                 Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => GamePage(userID, userList.length, snapshot.data["turns"], userList)
+                  builder: (context) => GamePage(userID, widget.roomID, userList.length, snapshot.data["turns"], userList)
                 ));
               });
             }
@@ -61,8 +61,14 @@ class WaitingRoomState extends State<WaitingRoom> {
               children: [
                 Column(children: [
                   for (int i = 0; i < userList.length; i++)
-                    Text(userList[i] + (userID == i ? " (You)" : ""))
+                    ListTile(
+                      title: Text(userList[i] + (userID == i ? " (You)" : "")),
+                      leading: Icon(Icons.person, size: 48),
+                      subtitle: i == 0 ? Text("ホスト") : Text("メンバー"),
+                    )
                 ]),
+                CircularProgressIndicator(),
+                Expanded(child: Container(),),
                 ButtonTheme(
                   buttonColor: Colors.white54,
                   minWidth: 150,
@@ -102,6 +108,7 @@ class WaitingRoomState extends State<WaitingRoom> {
                     },
                   )
                 ),
+                SizedBox(height: 100),
               ],
             );
           }
