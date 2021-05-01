@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:number_game/socket_io_setup.dart';
 import 'package:number_game/waiting_room.dart';
+import 'dart:async';
 
 
 class CreatedGameListState extends State<CreatedGameList> {
   List gameList = [];
-@override
-void initState() {
-  super.initState();
-  socket.emit('get rooms');
-}
+  int userID;
+  List memberList = [];
+  String joinedRoomID;
+
+  @override
+  void initState() {
+    super.initState();
+    socket.emit('get rooms');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +27,10 @@ void initState() {
         builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot){
           if(snapshot.hasData && snapshot.data["event"] == "room list"){
             gameList = snapshot.data["rooms"];
-            streamSocket.addResponse(null);
+          }
+          if(snapshot.hasData && snapshot.data["event"] == "user_id"){
+            userID = snapshot.data["user_id"];
+            memberList = snapshot.data["members"];
           }
           return ListView(
             children: [
@@ -54,13 +62,23 @@ void initState() {
       ),
       onTap: (){
         socket.emit('join', [roomID, username]);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => WaitingRoom(username))
-        );
+        joinedRoomID = roomID;
+        Timer(Duration(microseconds: 10), _toNextPage);
       },
       leading: Icon(Icons.group, size: 48),
     );
+  }
+
+  void _toNextPage(){
+    if(userID == null || joinedRoomID == null) {
+      Timer(Duration(microseconds: 10), _toNextPage);
+    }
+    else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => WaitingRoom(userID, joinedRoomID, memberList))
+      );
+    }
   }
 }
 

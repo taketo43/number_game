@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => WaitingRoom(username)));
+                            builder: (context) => WaitingRoom(0, "test_room", [username])));
                     //　サーバーに名前を渡す？
                   }),
             ),

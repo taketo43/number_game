@@ -51,6 +51,11 @@ void connectAndListen(){
       streamSocket.addResponse(data);
     });
 
+    socket.on('leave', (data){
+      data['event'] = 'leave';
+      streamSocket.addResponse(data);
+    });
+
     socket.on('everyone selected', (data){
       data['event'] = 'everyone selected';
       streamSocket.addResponse(data);

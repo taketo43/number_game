@@ -95,13 +95,6 @@ class _GamePageState extends State<GamePage> {
   void _handleFinishGame() {
     socket.emit('finish', roomID);
     streamSocket.addResponse(null);
-    _toHomePage();
-  }
-
-  void _toHomePage() {
-    // ホーム画面へ戻る処理
-    socket.emit('exit room', roomID);
-    print('exit');
   }
 
   @override
@@ -109,7 +102,9 @@ class _GamePageState extends State<GamePage> {
     double width = MediaQuery.of(context).size.width / 3.5;
     double height = width * (1 + sqrt(5)) / 2;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        automaticallyImplyLeading: false
+      ),
       body: StreamBuilder(
         stream: streamSocket.getResponse,
         builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot){
@@ -122,7 +117,10 @@ class _GamePageState extends State<GamePage> {
             Timer(Duration(microseconds: 100), _handleGameResart);
           }else if(snapshot.hasData && snapshot.data['event'] == 'finish'){
             print('finish');
-            Timer(Duration(microseconds: 100), _toHomePage);
+            Timer(Duration(microseconds: 100), () {
+              socket.emit('exit room', roomID);
+              print('exit');
+            });
           }
           for(int i = 0; i < selections.length; i++){
             selections[i] = int.parse(selections[i]);
