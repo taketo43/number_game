@@ -3,6 +3,7 @@ import './socket_io_setup.dart';
 import 'package:number_game/created_game_list.dart';
 import 'package:number_game/waiting_room.dart';
 import 'package:number_game/socket_io_setup.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
   connectAndListen();
@@ -32,15 +33,33 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String username = "";
+  var uuid = Uuid();
   void _handleText(String e) {
     setState(() {
       username = e;
     });
   }
 
+  Future _showDialog() async {
+    var value = await showDialog(
+      context: context,
+      builder: (BuildContext context) => new AlertDialog(
+        title: new Text(''),
+        content: new Text('名前を入力してください'),
+        actions: <Widget>[
+          new SimpleDialogOption(
+            child: new Text('閉じる'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    String roomId = 'test';
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -66,12 +85,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   //   ),
                   // ),
                   Container(
-                    width: 150,
-                    child: new TextField(
+                    width: 175,
+                    child: new TextFormField(
+                      enabled: true,
                       textAlign: TextAlign.center,
-                      maxLength: 15,
-                      maxLengthEnforced: false,
                       maxLines: 1,
+                      decoration: InputDecoration(
+                        hintText: '名前を入力してください',
+                      ),
                       onChanged: _handleText,
                     ),
                   ),
@@ -85,11 +106,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: RaisedButton(
                         child: Text("ホストで始める"),
                         onPressed: () {
-                          socket.emit('create', [roomId, username]);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => WaitingRoom(0, roomId, [username])));
+                          if (this.username.length == 0) {
+                            _showDialog();
+                          } else {
+                            String roomId = uuid.v1();
+                            socket.emit('create', [roomId, username]);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        WaitingRoom(0, roomId, [username])));
+                          }
                           //　サーバーに名前を渡す？
                         }),
                   ),
@@ -103,13 +130,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: RaisedButton(
                         child: Text("ゲームに参加する"),
                         onPressed: () {
-                          socket.emit('get rooms');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    CreatedGameList(username)),
-                          );
+                          if (this.username.length == 0) {
+                            _showDialog();
+                          } else {
+                            socket.emit('get rooms');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      CreatedGameList(username)),
+                            );
+                          }
                           // サーバーに名前を渡す？
                         }),
                   )
