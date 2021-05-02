@@ -103,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     buttonColor: Colors.white54,
                     minWidth: 150,
                     height: 40,
-                    child: RaisedButton(
+                    child: ElevatedButton(
                         child: Text("ホストで始める"),
                         onPressed: () {
                           if (this.username.length == 0) {
@@ -127,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     minWidth: 150,
                     height: 40,
                     buttonColor: Colors.white54,
-                    child: RaisedButton(
+                    child: ElevatedButton(
                         child: Text("ゲームに参加する"),
                         onPressed: () {
                           if (this.username.length == 0) {
