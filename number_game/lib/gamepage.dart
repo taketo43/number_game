@@ -57,15 +57,23 @@ class _GamePageState extends State<GamePage> {
       context: context,
       builder: (context){
         Widget res = selections.indexOf(selectedNumber) == -1 ? SimpleDialog(
-          title: Text("セーフ"),
           children: [
-            Text("今回はセーフ") // 差し替えてもいいかも
+            Image(
+              image: AssetImage('images/safe.JPG'),
+              fit: BoxFit.fill,
+            )
           ],
+          titlePadding: EdgeInsets.all(0),
+          contentPadding: EdgeInsets.all(0),
         ) : SimpleDialog(
-          title: Text("アウト"),
           children: [
-            Text("$selectedNumber 被り") // 差し替えてもいいかも
-          ]
+            Image(
+              image: AssetImage('images/out.jpg'),
+              fit: BoxFit.fill,
+            )
+          ],
+          titlePadding: EdgeInsets.all(0),
+          contentPadding: EdgeInsets.all(0),
         );
         return res;
       }
@@ -133,6 +141,7 @@ class _GamePageState extends State<GamePage> {
             });
           }
           for(int i = 0; i < selections.length; i++){
+            if(selections[i].runtimeType == String) selections[i] = int.parse(selections[i]);
             widget.players[i].use(selections[i]);
           }
           List<DropdownMenuItem<int>> _numbers = [];

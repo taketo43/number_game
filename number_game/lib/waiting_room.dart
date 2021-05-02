@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:number_game/socket_io_setup.dart';
 import 'dart:async';
 import 'gamepage.dart';
+import 'custom_icons.dart';
 
 class WaitingRoom extends StatefulWidget {
   final List membarList;
@@ -62,7 +63,7 @@ class WaitingRoomState extends State<WaitingRoom> {
                   for (int i = 0; i < userList.length; i++)
                     ListTile(
                       title: Text(userList[i] + (userID == i ? " (You)" : "")),
-                      leading: Icon(Icons.person, size: 48),
+                      leading: myIcons.getIcon(userList[i], 48, Colors.transparent),
                       subtitle: i == 0 ? Text("ホスト") : Text("メンバー"),
                     )
                 ]),
