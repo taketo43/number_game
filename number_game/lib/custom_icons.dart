@@ -104,6 +104,7 @@ class CustomIcons {
         )
       );
     }
+    if(color == Colors.transparent) color = null;
     return Icon(Icons.person, size: size, color: color);
   }
 }
