@@ -50,10 +50,10 @@ class CreatedGameListState extends State<CreatedGameList> {
   Widget _gameItem(String host, int participants, String roomID, context) {
     String username = widget.username;
     return ListTile(
-      title: Text("$roomID"),
+      title: Text("ホスト : $host"),
       subtitle:
           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text("ホスト : $host"),
+        Text("ID : $roomID"),
         Text("現在の人数 : $participants"),
       ]),
       onTap: () {
