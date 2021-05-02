@@ -40,6 +40,16 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
+  assets:
+    - images/mitomi.jpeg
+    - images/takeda.JPG
+    - images/akisawa.jpg
+    - images/out.jpg
+    - images/safe.JPG
+    - images/fujitani.jpg
+    - images/ishii.JPG
+    - images/tanuma.JPG
+    - images/takahashi.JPG
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

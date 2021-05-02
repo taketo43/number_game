@@ -1,5 +1,6 @@
 import 'dart:math';
 import './my_card.dart';
+import './custom_icons.dart';
 
 import 'package:flutter/material.dart';
 
@@ -51,11 +52,7 @@ class _PlayerWidgetState extends State<PlayerWidget> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.person,
-            size: iconSize,
-            color: widget.color,
-          ),
+          myIcons.getIcon(widget.player.username, iconSize, widget.color),
           Text(
             widget.player.username,
             style: TextStyle(fontSize: 18),
@@ -98,7 +95,7 @@ class _PlayerFieldWidgetState extends State<PlayerFieldWidget> {
             Positioned(
               child: PlayerWidget(
                 player: widget.players[i],
-                color: widget.players[i].isHaving(widget.selectedNumber) ? Colors.red : null,
+                color: widget.players[i].isHaving(widget.selectedNumber) ? Colors.red : Colors.transparent,
               ),
               left: r - cos(theta * (i + 1)) * r,
               top: r - sin(theta * (i + 1)) * r,
